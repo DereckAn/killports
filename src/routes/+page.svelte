@@ -11,7 +11,6 @@
   }
 </script>
 
-<main class="container bg-black">
+<main class="bg-[rgba(18,18,20,0.71)]">
   <h1 class="text-3xl font-bold mb-4 text-emerald-600 ">Welcome to Tauri + Svelte</h1>
-
 </main>
