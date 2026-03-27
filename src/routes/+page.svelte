@@ -1,5 +1,6 @@
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/core";
+  import ShowPorts from "../components/content/ShowPorts.svelte";
 
   let name = $state("");
   let greetMsg = $state("");
@@ -23,12 +24,8 @@
   </header>
 
   <div class="flex border-2 border-blue-500 w-full h-full">
-    <section class="border-2 border-green-500 w-full">
-      <h1 class="text-3xl font-bold mb-4 text-emerald-600">
-        Welcome to Tauri + Svelte
-      </h1>
-    </section>
-    <aside class="border border-red-500 w-full">
+    <ShowPorts />
+    <aside class="basis-[40%] shrink-0 border border-red-500">
       <h2 class="text-white">aside</h2>
     </aside>
   </div>
