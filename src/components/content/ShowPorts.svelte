@@ -28,10 +28,7 @@
   }
 </script>
 
-<section class="flex-1 border-2 border-green-500">
-  <h1 class="text-3xl font-bold mb-4 text-emerald-600">
-    Welcome to Tauri + Svelte
-  </h1>
+<section class="flex-1 min-w-0 border-2 border-green-500">
   <button onclick={fetchPorts} class="px-4 py-2 bg-blue-500 text-white rounded">
     Get active ports
   </button>
@@ -41,29 +38,29 @@
     <p class="text-red-500 mt-2">{error}</p>
   {/if}
   {#if ports.length > 0}
-    <div class="overflow-auto max-h-96">
-      <table class="text-white w-full">
+    <div class="overflow-auto max-h-96 border-4 border-purple-500 w-full">
+      <table class="text-white w-full table-fixed">
         <thead>
           <tr class="bg-gray-700">
-            <th class="p-2">Protocol</th>
-            <th class="p-2">Local Address</th>
-            <th class="p-2">Local Port</th>
-            <th class="p-2">Remote Address</th>
-            <th class="p-2">Remote Port</th>
-            <th class="p-2">State</th>
-            <th class="p-2">Process</th>
+            <th class="w-[10%]">Protocol</th>
+            <th class="w-[20%]">Local Address</th>
+            <th class="w-[10%]">Local Port</th>
+            <th class="w-[20%]">Remote Address</th>
+            <th class="w-[10%]">Remote Port</th>
+            <th class="w-[10%]">State</th>
+            <th class="w-[10%]">Process</th>
           </tr>
         </thead>
         <tbody>
           {#each ports as port}
             <tr class="border-b border-gray-600">
-              <td class="p-2">{port.protocol}</td>
-              <td class="p-2">{port.local_address}</td>
-              <td class="p-2">{port.local_port}</td>
-              <td class="p-2">{port.remote_address}</td>
-              <td class="p-2">{port.remote_port}</td>
-              <td class="p-2">{port.state}</td>
-              <td class="p-2">{port.process_name || "N/A"}</td>
+              <td>{port.protocol}</td>
+              <td class="w-24 max-w-24 truncate">{port.local_address}</td>
+              <td>{port.local_port}</td>
+              <td>{port.remote_address}</td>
+              <td>{port.remote_port}</td>
+              <td>{port.state}</td>
+              <td>{port.process_name || "N/A"}</td>
             </tr>
           {/each}
         </tbody>
