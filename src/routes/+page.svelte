@@ -1,14 +1,22 @@
 <script lang="ts">
-  import { invoke } from "@tauri-apps/api/core";
+  import Aside from "../components/aside/Aside.svelte";
   import ShowPorts from "../components/content/ShowPorts.svelte";
 
-  let name = $state("");
-  let greetMsg = $state("");
+  interface PortInfo {
+    local_port: number;
+    local_address: string;
+    remote_port: number;
+    remote_address: string;
+    state: string;
+    protocol: string;
+    process_name: string | null;
+    pid: number | null;
+  }
 
-  async function greet(event: Event) {
-    event.preventDefault();
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    greetMsg = await invoke("greet", { name });
+  let selectedPort = $state<PortInfo | null>(null);
+
+  function handlePOrtSleceted(port: PortInfo | null) {
+    selectedPort = port;
   }
 </script>
 
@@ -24,9 +32,8 @@
   </header>
 
   <div class="flex border-2 border-blue-500 w-full h-full">
-    <ShowPorts />
-    <aside class="basis-[40%] shrink-0 border border-red-500">
-      <h2 class="text-white">aside</h2>
-    </aside>
+    <ShowPorts onPortSelected={handlePOrtSleceted} />
+
+    <Aside selectedPort={selectedPort!} />
   </div>
 </main>

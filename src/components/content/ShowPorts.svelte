@@ -1,6 +1,8 @@
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/core";
-
+  interface Props {
+    onPortSelected: (port: PortInfo | null) => void;
+  }
   interface PortInfo {
     local_port: number;
     local_address: string;
@@ -22,6 +24,9 @@
     port_range_min: number | null;
     port_range_max: number | null;
   }
+
+  let { onPortSelected }: Props = $props();
+  let selectedPort = $state<PortInfo | null>(null);
   let ports = $state<PortInfo[]>([]);
   let loading = $state(false);
   let error = $state("");
@@ -71,62 +76,14 @@
     }
   }
 
-  // Preset filters
-  function applyPreset(preset: string) {
-    switch (preset) {
-      case "clean":
-        // Clean View: Only listening ports, hide ephemeral, hide system
-        stateFilter = "Listen";
-        hideEphemeralPorts = true;
-        hideSystemProcesses = true;
-        addressType = "all";
-        protocolFilter = "all";
-        searchQuery = "";
-        break;
-      case "security":
-        // Security Audit: Only listening, network-accessible
-        stateFilter = "Listen";
-        addressType = "network";
-        hideSystemProcesses = false;
-        hideEphemeralPorts = true;
-        protocolFilter = "all";
-        searchQuery = "";
-        break;
-      case "developer":
-        // Developer View: Localhost only, listening
-        stateFilter = "Listen";
-        addressType = "localhost";
-        hideSystemProcesses = true;
-        hideEphemeralPorts = true;
-        protocolFilter = "all";
-        searchQuery = "";
-        break;
-      case "active":
-        // Active Connections: Established, no localhost
-        stateFilter = "Established";
-        addressType = "network";
-        hideSystemProcesses = false;
-        hideEphemeralPorts = false;
-        protocolFilter = "all";
-        searchQuery = "";
-        break;
-      case "all":
-        // Reset all filters
-        resetFilters();
-        break;
-    }
-    fetchPorts();
+  function selectPort(port: PortInfo) {
+    selectedPort = port;
+    onPortSelected(port);
   }
 
-  function resetFilters() {
-    searchQuery = "";
-    protocolFilter = "all";
-    stateFilter = "all";
-    addressType = "all";
-    hideSystemProcesses = false;
-    hideEphemeralPorts = false;
-    portRangeMin = null;
-    portRangeMax = null;
+  function clearSelection() {
+    selectedPort = null;
+    onPortSelected(null);
   }
 
   // Load states on mount
@@ -139,8 +96,6 @@
 <section
   class="flex-1 border-2 border-green-500 flex flex-col overflow-hidden p-4"
 >
-  <h1 class="text-2xl font-bold mb-4 text-emerald-400">Port Monitor</h1>
-
   <!-- Search Bar -->
   <div class="mb-4">
     <input
@@ -151,40 +106,6 @@
   focus:outline-none focus:border-emerald-500"
       onkeyup={(e) => e.key === "Enter" && fetchPorts()}
     />
-  </div>
-
-  <!-- Preset Filter Buttons -->
-  <div class="flex gap-2 mb-4 flex-wrap">
-    <button
-      onclick={() => applyPreset("clean")}
-      class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded"
-    >
-      🧹 Clean View
-    </button>
-    <button
-      onclick={() => applyPreset("security")}
-      class="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded"
-    >
-      🔒 Security Audit
-    </button>
-    <button
-      onclick={() => applyPreset("developer")}
-      class="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded"
-    >
-      💻 Developer
-    </button>
-    <button
-      onclick={() => applyPreset("active")}
-      class="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded"
-    >
-      🌐 Active Connections
-    </button>
-    <button
-      onclick={() => applyPreset("all")}
-      class="px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white text-sm rounded"
-    >
-      ⭕ Show All
-    </button>
   </div>
 
   <!-- Quick Filters -->
@@ -301,21 +222,29 @@
   <!-- Ports Table -->
   <div class="flex-1 overflow-auto">
     {#if ports.length > 0}
-      <table class="w-full text-white text-sm">
+      <table class="w-full text-white text-sm table-fixed">
         <thead class="sticky top-0 bg-gray-800">
           <tr class="border-b border-gray-600">
-            <th class="p-2 text-left">Protocol</th>
-            <th class="p-2 text-left">Local Address</th>
-            <th class="p-2 text-left">Local Port</th>
-            <th class="p-2 text-left">Remote Address</th>
-            <th class="p-2 text-left">Remote Port</th>
-            <th class="p-2 text-left">State</th>
-            <th class="p-2 text-left">Process</th>
+            <th class="w-[10%]">Protocol</th>
+            <th class="w-[10%]">Local Address</th>
+            <th class="w-[10%]">Local Port</th>
+            <th class="w-[10%]">Remote Address</th>
+            <th class="w-[10%]">Remote Port</th>
+            <th class="w-[10%]">State</th>
+            <th class="w-[10%]">Process</th>
           </tr>
         </thead>
         <tbody>
           {#each ports as port}
-            <tr class="border-b border-gray-700 hover:bg-gray-800">
+            <tr
+              class="border-b border-gray-700 hover:bg-gray-800 cursor-pointer transition-colors duration-300 {selectedPort?.local_port ===
+                port.local_port && selectedPort?.pid === port.pid
+                ? 'bg-emerald-900/30 border-l-4 border-l-emerald-500'
+                : ''}"
+              onclick={() => selectPort(port)}
+              role="button"
+              tabindex="0"
+            >
               <td class="p-2">
                 <span
                   class="px-2 py-1 rounded text-xs {port.protocol === 'TCP'
