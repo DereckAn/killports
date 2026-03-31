@@ -1,28 +1,11 @@
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/core";
+  import type { PortFilters, PortInfo } from "../../interfaces/Ports";
+  import eyeIcon from "../../assets/eye.svg?raw";
+  import killIcon from "../../assets/kill.svg?raw";
+
   interface Props {
     onPortSelected: (port: PortInfo | null) => void;
-  }
-  interface PortInfo {
-    local_port: number;
-    local_address: string;
-    remote_port: number;
-    remote_address: string;
-    state: string;
-    protocol: string;
-    process_name: string | null;
-    pid: number | null;
-  }
-
-  interface PortFilters {
-    search_query: string | null;
-    protocol_filter: string | null;
-    state_filter: string | null;
-    address_type: string | null;
-    hide_system_processes: boolean;
-    hide_ephemeral_ports: boolean;
-    port_range_min: number | null;
-    port_range_max: number | null;
   }
 
   let { onPortSelected }: Props = $props();
@@ -225,13 +208,14 @@
       <table class="w-full text-white text-sm table-fixed">
         <thead class="sticky top-0 bg-gray-800">
           <tr class="border-b border-gray-600">
-            <th class="w-[10%]">Protocol</th>
-            <th class="w-[10%]">Local Address</th>
-            <th class="w-[10%]">Local Port</th>
-            <th class="w-[10%]">Remote Address</th>
-            <th class="w-[10%]">Remote Port</th>
+            <th class="w-[10%]">Port</th>
+            <th class="w-[10%]">Address</th>
+            <th class="w-[10%]">PID</th>
+            <!-- <th class="w-[10%]">Remote Address</th>
+            <th class="w-[10%]">Remote Port</th> -->
             <th class="w-[10%]">State</th>
             <th class="w-[10%]">Process</th>
+            <th class="w-[10%]">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -245,21 +229,13 @@
               role="button"
               tabindex="0"
             >
-              <td class="p-2">
-                <span
-                  class="px-2 py-1 rounded text-xs {port.protocol === 'TCP'
-                    ? 'bg-blue-900 text-blue-200'
-                    : 'bg-purple-900 text-purple-200'}"
-                >
-                  {port.protocol}
-                </span>
-              </td>
-              <td class="p-2 font-mono text-xs">{port.local_address}</td>
               <td class="p-2 font-mono font-bold text-emerald-400">
                 {port.local_port}
               </td>
-              <td class="p-2 font-mono text-xs">{port.remote_address}</td>
-              <td class="p-2 font-mono text-xs">{port.remote_port || "-"}</td>
+              <td class="p-2 font-mono text-xs">{port.local_address}</td>
+              <td class="p-2 font-mono text-xs">{port.pid}</td>
+              <!-- <td class="p-2 font-mono text-xs">{port.remote_address}</td>
+              <td class="p-2 font-mono text-xs">{port.remote_port || "-"}</td> -->
               <td class="p-2">
                 <span
                   class="px-2 py-1 rounded text-xs {port.state === 'Listen'
@@ -278,6 +254,29 @@
                 title={port.process_name || "N/A"}
               >
                 {port.process_name || "N/A"}
+              </td>
+              <td class="p-2">
+                <div class="flex gap-2 items-center">
+                  <button
+                    onclick={(e) => {
+                      e.stopPropagation();
+                      selectPort(port);
+                    }}
+                    class="text-blue-400 hover:text-blue-200 transition-colors"
+                    title="View"
+                  >
+                    {@html eyeIcon}
+                  </button>
+                  <button
+                    onclick={(e) => {
+                      e.stopPropagation();
+                    }}
+                    class="text-red-400 hover:text-red-200 transition-colors"
+                    title="Kill"
+                  >
+                    {@html killIcon}
+                  </button>
+                </div>
               </td>
             </tr>
           {/each}

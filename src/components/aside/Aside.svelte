@@ -1,17 +1,8 @@
 <script lang="ts">
+  import type { PortInfo } from "../../interfaces/Ports";
+
   interface Props {
     selectedPort: PortInfo | null;
-  }
-
-  interface PortInfo {
-    local_port: number;
-    local_address: string;
-    remote_port: number;
-    remote_address: string;
-    state: string;
-    protocol: string;
-    process_name: string | null;
-    pid: number | null;
   }
 
   let { selectedPort }: Props = $props();
@@ -81,6 +72,22 @@
           <div class="text-xs text-gray-400 mb-1">Local Address</div>
           <div class="font-mono text-sm break-all">
             {selectedPort.local_address}
+          </div>
+        </div>
+
+        <!-- Remote Address -->
+        <div class="bg-gray-800 p-3 rounded">
+          <div class="text-xs text-gray-400 mb-1">Remote Address</div>
+          <div class="font-mono text-sm break-all">
+            {selectedPort.remote_address}
+          </div>
+        </div>
+
+        <!-- Remote Port -->
+        <div class="bg-gray-800 p-3 rounded">
+          <div class="text-xs text-gray-400 mb-1">Remote Port</div>
+          <div class="font-mono text-sm break-all">
+            {selectedPort.remote_port}
           </div>
         </div>
 

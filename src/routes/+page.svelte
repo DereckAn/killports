@@ -1,17 +1,7 @@
 <script lang="ts">
   import Aside from "../components/aside/Aside.svelte";
   import ShowPorts from "../components/content/ShowPorts.svelte";
-
-  interface PortInfo {
-    local_port: number;
-    local_address: string;
-    remote_port: number;
-    remote_address: string;
-    state: string;
-    protocol: string;
-    process_name: string | null;
-    pid: number | null;
-  }
+  import type { PortInfo } from "../interfaces/Ports";
 
   let selectedPort = $state<PortInfo | null>(null);
 
