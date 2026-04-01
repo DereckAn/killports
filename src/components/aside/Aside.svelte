@@ -14,13 +14,6 @@
       <!-- Header -->
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-xl font-bold text-emerald-400">Port Details</h2>
-        <button
-          onclick={() => (selectedPort = null)}
-          class="text-gray-400 hover:text-white text-2xl leading-none"
-          title="Close"
-        >
-          ×
-        </button>
       </div>
 
       <!-- Port Number - Large Display -->
