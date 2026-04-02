@@ -11,9 +11,9 @@ export interface PortInfo {
 
 export interface PortFilters {
   search_query: string | null;
-  protocol_filter: string | null;
-  state_filter: string | null;
-  address_type: string | null;
+  protocol_filter: string[] | null;
+  state_filter: string[] | null;
+  address_type: string[] | null;
   hide_system_processes: boolean;
   hide_ephemeral_ports: boolean;
   port_range_min: number | null;

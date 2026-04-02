@@ -7,13 +7,11 @@
 
   let selectedPort = $state<PortInfo | null>(null);
   let availableStates = $state<string[]>([]);
-  let showAdvancedFilters = $state(false);
-
   // Filter state
   let searchQuery = $state("");
-  let protocolFilter = $state<string>("all");
-  let stateFilter = $state<string>("all");
-  let addressType = $state<string>("all");
+  let protocolFilter = $state<string[]>([]);
+  let stateFilter = $state<string[]>([]);
+  let addressType = $state<string[]>([]);
   let hideSystemProcesses = $state(false);
   let hideEphemeralPorts = $state(false);
   let portRangeMin = $state<number | null>(null);
@@ -22,9 +20,9 @@
   // Compute filters object
   let filters = $derived<PortFilters>({
     search_query: searchQuery || null,
-    protocol_filter: protocolFilter === "all" ? null : protocolFilter,
-    state_filter: stateFilter === "all" ? null : stateFilter,
-    address_type: addressType === "all" ? null : addressType,
+    protocol_filter: protocolFilter.length > 0 ? protocolFilter : null,
+    state_filter: stateFilter.length > 0 ? stateFilter : null,
+    address_type: addressType.length > 0 ? addressType : null,
     hide_system_processes: hideSystemProcesses,
     hide_ephemeral_ports: hideEphemeralPorts,
     port_range_min: portRangeMin,
@@ -62,7 +60,6 @@
     bind:hideEphemeralPorts
     bind:portRangeMin
     bind:portRangeMax
-    bind:showAdvancedFilters
     {availableStates}
   />
 

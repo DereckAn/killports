@@ -15,9 +15,9 @@ pub struct PortInfo {
 #[derive(serde::Deserialize)]
 pub struct PortFilters {
     pub search_query: Option<String>,
-    pub protocol_filter: Option<String>,
-    pub state_filter: Option<String>,
-    pub address_type: Option<String>,
+    pub protocol_filter: Option<Vec<String>>,
+    pub state_filter: Option<Vec<String>>,
+    pub address_type: Option<Vec<String>>,
     pub hide_system_processes: bool,
     pub hide_ephemeral_ports: bool,
     pub port_range_min: Option<u16>,
@@ -94,34 +94,30 @@ pub fn get_active_ports(filters: PortFilters) -> Result<Vec<PortInfo>, String> {
 
             // Apply filters
 
-            // Protocol filter
-            if let Some(ref prot) = filters.protocol_filter {
-                if !prot.is_empty() && protocol != *prot {
+            // Protocol filter (multi-select: OR logic)
+            if let Some(ref protocols) = filters.protocol_filter {
+                if !protocols.is_empty() && !protocols.contains(&protocol) {
                     return None;
                 }
             }
 
-            // State filter
-            if let Some(ref st) = filters.state_filter {
-                if !st.is_empty() && state != *st {
+            // State filter (multi-select: OR logic)
+            if let Some(ref states) = filters.state_filter {
+                if !states.is_empty() && !states.contains(&state) {
                     return None;
                 }
             }
 
-            // Address type filter
-            if let Some(ref addr_type) = filters.address_type {
-                match addr_type.as_str() {
-                    "localhost" => {
-                        if !local_addr.starts_with("127.0.0.1") && !local_addr.starts_with("::1") {
-                            return None;
-                        }
+            // Address type filter (multi-select)
+            if let Some(ref addr_types) = filters.address_type {
+                if !addr_types.is_empty() {
+                    let is_localhost =
+                        local_addr.starts_with("127.0.0.1") || local_addr.starts_with("::1");
+                    let matches = (is_localhost && addr_types.contains(&"localhost".to_string()))
+                        || (!is_localhost && addr_types.contains(&"network".to_string()));
+                    if !matches {
+                        return None;
                     }
-                    "network" => {
-                        if local_addr.starts_with("127.0.0.1") || local_addr.starts_with("::1") {
-                            return None;
-                        }
-                    }
-                    _ => {} // "all" or empty - no filter
                 }
             }
 
