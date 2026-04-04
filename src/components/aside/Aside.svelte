@@ -118,6 +118,17 @@
           </div>
         {/if}
 
+        {#if selectedPort.command_line}
+          <div class="bg-gray-800 p-3 rounded">
+            <div class="text-xs text-gray-400 mb-1">Command Line</div>
+            <div
+              class="font-mono text-xs break-all text-gray-200 whitespace-pre-wrap"
+            >
+              {selectedPort.command_line}
+            </div>
+          </div>
+        {/if}
+
         <!-- Connection Type Info -->
         <div class="bg-gray-800 p-3 rounded">
           <div class="text-xs text-gray-400 mb-1">Connection Type</div>

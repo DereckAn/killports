@@ -10,6 +10,7 @@ pub struct PortInfo {
     pub protocol: String,
     pub process_name: Option<String>,
     pub pid: Option<u32>,
+    pub command_line: Option<String>,
 }
 
 #[derive(serde::Deserialize)]
@@ -72,14 +73,24 @@ pub fn get_active_ports(filters: PortFilters) -> Result<Vec<PortInfo>, String> {
                 };
 
             let pid = socket.associated_pids.first().map(|p| *p as u32);
-            let process_name = pid.and_then(|p| {
-                sys.process(sysinfo::Pid::from_u32(p))
-                    .map(|process| {
+            let (process_name, command_line) = pid
+                .map(|p| {
+                    if let Some(process) = sys.process(sysinfo::Pid::from_u32(p)) {
                         let name = process.name().to_str().unwrap_or("Unknown");
-                        format!("{} (PID: {})", name, p)
-                    })
-                    .or_else(|| Some(format!("PID: {}", p)))
-            });
+                        let name_str = format!("{} (PID: {})", name, p);
+                        let cmd: Vec<&str> =
+                            process.cmd().iter().filter_map(|s| s.to_str()).collect();
+                        let cmd_str = if cmd.is_empty() {
+                            None
+                        } else {
+                            Some(cmd.join(" "))
+                        };
+                        (Some(name_str), cmd_str)
+                    } else {
+                        (Some(format!("PID: {}", p)), None)
+                    }
+                })
+                .unwrap_or((None, None));
 
             let port_info = PortInfo {
                 local_port,
@@ -90,6 +101,7 @@ pub fn get_active_ports(filters: PortFilters) -> Result<Vec<PortInfo>, String> {
                 protocol: protocol.clone(),
                 process_name: process_name.clone(),
                 pid,
+                command_line: command_line.clone(),
             };
 
             // Apply filters

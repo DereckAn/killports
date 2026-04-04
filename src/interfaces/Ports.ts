@@ -7,6 +7,7 @@ export interface PortInfo {
   protocol: string;
   process_name: string | null;
   pid: number | null;
+  command_line: string | null;
 }
 
 export interface PortFilters {
