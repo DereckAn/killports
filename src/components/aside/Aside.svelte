@@ -3,9 +3,15 @@
 
   interface Props {
     selectedPort: PortInfo | null;
+    watchedPorts: Set<number>;
+    onToggleWatch: (port: PortInfo) => Promise<void>;
   }
 
-  let { selectedPort }: Props = $props();
+  let { selectedPort, watchedPorts, onToggleWatch }: Props = $props();
+
+  let isWatched = $derived(
+    selectedPort ? watchedPorts.has(selectedPort.local_port) : false,
+  );
 </script>
 
 <aside class="basis-[40%] shrink-0 border border-red-500 p-4 overflow-auto">
@@ -175,6 +181,52 @@
           </div>
         </div>
       </div>
+
+      <button
+        class="w-full px-4 py-2 rounded font-semibold flex items-center
+   justify-center gap-2 {isWatched
+          ? 'bg-emerald-700 hover:bg-emerald-800 text-white'
+          : 'bg-gray-700 hover:bg-gray-600 text-white'}
+      {!selectedPort?.command_line ? 'opacity-40 cursor-not-allowed' : ''}"
+        onclick={() => selectedPort && onToggleWatch(selectedPort)}
+        disabled={!selectedPort?.command_line}
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="1em"
+          height="1em"
+          viewBox="0 0 24 24"
+        >
+          <g
+            fill="none"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-width="1.5"
+          >
+            <path
+              stroke-miterlimit="10"
+              d="M18.024 7.043A8.374 8.374 0
+   0 0 3.74 12.955"
+            />
+            <path
+              stroke-linejoin="round"
+              d="m17.35 2.75l.832
+  3.372a1.123 1.123 0 0 1-.854 1.382l-3.372.843"
+            />
+            <path
+              stroke-miterlimit="10"
+              d="M5.976 16.957a8.374 8.374 0
+   0 0 14.285-5.912"
+            />
+            <path
+              stroke-linejoin="round"
+              d="m6.65
+  21.25l-.832-3.372a1.124 1.124 0 0 1 .855-1.382l3.371-.843"
+            />
+          </g>
+        </svg>
+        {isWatched ? "Stop Watching" : "Keep Alive"}
+      </button>
 
       <!-- Action Buttons -->
       <div class="mt-6 space-y-2">

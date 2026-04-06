@@ -1,15 +1,16 @@
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/core";
-  import type { PortFilters, PortInfo } from "../../interfaces/Ports";
   import eyeIcon from "../../assets/eye.svg?raw";
   import killIcon from "../../assets/kill.svg?raw";
+  import type { PortFilters, PortInfo } from "../../interfaces/Ports";
 
   interface Props {
     onPortSelected: (port: PortInfo | null) => void;
     filters: PortFilters;
+    watchedPorts: Set<number>;
   }
 
-  let { filters, onPortSelected }: Props = $props();
+  let { filters, onPortSelected, watchedPorts }: Props = $props();
   let selectedPort = $state<PortInfo | null>(null);
   let ports = $state<PortInfo[]>([]);
   let loading = $state(false);
@@ -81,7 +82,15 @@
               tabindex="0"
             >
               <td class="p-2 font-mono font-bold text-emerald-400">
-                {port.local_port}
+                <div class="flex items-center gap-1">
+                  {port.local_port}
+                  {#if watchedPorts.has(port.local_port)}
+                    <span
+                      class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"
+                      title="Keep-alive active"
+                    ></span>
+                  {/if}
+                </div>
               </td>
               <td class="p-2 font-mono text-xs">{port.local_address}</td>
               <td class="p-2 font-mono text-xs">{port.pid}</td>
