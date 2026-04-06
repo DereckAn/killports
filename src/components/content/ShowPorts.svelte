@@ -8,9 +8,17 @@
     onPortSelected: (port: PortInfo | null) => void;
     filters: PortFilters;
     watchedPorts: Set<number>;
+    onKillProcess: (port: PortInfo) => Promise<void>;
+    refreshTrigger: number; // A simple prop to trigger refreshes when needed
   }
 
-  let { filters, onPortSelected, watchedPorts }: Props = $props();
+  let {
+    filters,
+    onPortSelected,
+    watchedPorts,
+    onKillProcess,
+    refreshTrigger,
+  }: Props = $props();
   let selectedPort = $state<PortInfo | null>(null);
   let ports = $state<PortInfo[]>([]);
   let loading = $state(false);
@@ -36,6 +44,7 @@
   // Fetch ports whenever filters change
   $effect(() => {
     fetchPOrts();
+    refreshTrigger; // Trigger refresh when the refreshTrigger changes
   });
 </script>
 
@@ -126,8 +135,9 @@
                     {@html eyeIcon}
                   </button>
                   <button
-                    onclick={(e) => {
+                    onclick={async (e) => {
                       e.stopPropagation();
+                      await onKillProcess(port);
                     }}
                     class="text-red-400 hover:text-red-200 transition-colors"
                     title="Kill"

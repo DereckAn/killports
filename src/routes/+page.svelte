@@ -8,6 +8,8 @@
   let selectedPort = $state<PortInfo | null>(null);
   let availableStates = $state<string[]>([]);
   let watchedPorts = $state<Set<number>>(new Set()); // A set is like an array but with no duplicates
+  let refreshTrigger = $state(0); // A simple counter to trigger refreshes when needed
+  let blockedPids = $state<Set<number>>(new Set()); // Track which PIDs have internet access blocked
 
   // Filter state
   let searchQuery = $state("");
@@ -66,6 +68,40 @@
     }
   }
 
+  async function handleKillProcess(port: PortInfo) {
+    if (!port.pid) return;
+
+    try {
+      await invoke("kill_process", { pid: port.pid });
+      selectedPort = null; // Clear selection if the killed process was selected
+      refreshTrigger += 1; // Trigger a refresh of the ports list
+    } catch (e) {
+      console.error("Failed to kill process:", e);
+    }
+  }
+
+  async function handleToggleInternet(port: PortInfo) {
+    if (!port.pid) return;
+
+    const isBlocked = blockedPids.has(port.pid);
+
+    try {
+      if (isBlocked) {
+        await invoke("unblock_internet", { pid: port.pid });
+        blockedPids.delete(port.pid);
+      } else {
+        await invoke("block_internet", { pid: port.pid });
+        blockedPids.add(port.pid);
+      }
+      blockedPids = new Set(blockedPids); // Trigger reactivity
+    } catch (e) {
+      console.error(
+        `Failed to ${isBlocked ? "unblock" : "block"} internet access:`,
+        e,
+      );
+    }
+  }
+
   $effect(() => {
     loadAvailableStates();
   });
@@ -89,12 +125,21 @@
   />
 
   <div class="flex border-2 border-blue-500 w-full h-full">
-    <ShowPorts onPortSelected={handlePortSelected} {filters} {watchedPorts} />
+    <ShowPorts
+      onPortSelected={handlePortSelected}
+      {filters}
+      {watchedPorts}
+      onKillProcess={handleKillProcess}
+      {refreshTrigger}
+    />
 
     <Aside
       selectedPort={selectedPort!}
       {watchedPorts}
       onToggleWatch={toggleWatch}
+      {blockedPids}
+      onToggleInternet={handleToggleInternet}
+      onKillProcess={handleKillProcess}
     />
   </div>
 </main>

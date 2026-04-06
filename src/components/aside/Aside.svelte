@@ -4,13 +4,27 @@
   interface Props {
     selectedPort: PortInfo | null;
     watchedPorts: Set<number>;
+    blockedPids: Set<number>;
     onToggleWatch: (port: PortInfo) => Promise<void>;
+    onToggleInternet: (port: PortInfo) => Promise<void>;
+    onKillProcess: (port: PortInfo) => Promise<void>;
   }
 
-  let { selectedPort, watchedPorts, onToggleWatch }: Props = $props();
+  let {
+    selectedPort,
+    watchedPorts,
+    blockedPids,
+    onToggleWatch,
+    onToggleInternet,
+    onKillProcess,
+  }: Props = $props();
 
   let isWatched = $derived(
     selectedPort ? watchedPorts.has(selectedPort.local_port) : false,
+  );
+
+  let isBlocked = $derived(
+    selectedPort?.pid ? blockedPids.has(selectedPort.pid) : false,
   );
 </script>
 
@@ -228,11 +242,45 @@
         {isWatched ? "Stop Watching" : "Keep Alive"}
       </button>
 
+      <!-- Internet Access Toggle -->
+      <div
+        class="bg-gray-800 p-3 rounded flex items-center justify-between mb-4"
+      >
+        <div>
+          <div class="text-xs text-gray-400 mb-1">Internet Access</div>
+          <div
+            class="text-sm font-semibold {isBlocked
+              ? 'text-red-400'
+              : 'text-green-400'}"
+          >
+            {isBlocked ? "Blocked" : "Allowed"}
+          </div>
+        </div>
+        <button
+          aria-label="Toggle internet access"
+          role="switch"
+          aria-checked={isBlocked}
+          onclick={() => selectedPort && onToggleInternet(selectedPort)}
+          disabled={!selectedPort?.pid}
+          class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200
+                 {isBlocked ? 'bg-red-600' : 'bg-gray-600'}
+                 {!selectedPort?.pid
+            ? 'opacity-40 cursor-not-allowed'
+            : 'cursor-pointer'}"
+        >
+          <span
+            class="inline-block h-4 w-4 rounded-full bg-white transition-transform duration-200
+                       {isBlocked ? 'translate-x-6' : 'translate-x-1'}"
+          >
+          </span>
+        </button>
+      </div>
+
       <!-- Action Buttons -->
       <div class="mt-6 space-y-2">
         <button
           class="w-full px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded font-semibold"
-          onclick={() => alert("Kill port feature coming soon!")}
+          onclick={() => selectedPort && onKillProcess(selectedPort)}
         >
           🔪 Kill Process
         </button>
